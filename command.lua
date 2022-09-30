@@ -1,6 +1,7 @@
 local S = default.get_translator
 
 minetest.register_chatcommand("run_in_book", {
+	params = "<command> [<args>]",
 	description = "run the command; put the output in the book's body",
 	func = function(name, param)
 		local player = minetest.get_player_by_name(name)
