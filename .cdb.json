@@ -1,0 +1,5 @@
+{
+    "type": "MOD",
+    "title": "book_runner",
+    "short_description": "run a command and put the output in a book"
+}
