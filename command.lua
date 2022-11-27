@@ -38,7 +38,6 @@ minetest.register_chatcommand("run_in_book", {
 		function minetest.chat_send_player(name2, message)
 			if name == name2 then
 				table.insert(received_messages, minetest.strip_colors(futil.strip_translation(message)))
-
 			else
 				old_chat_send_player(name2, message)
 			end
@@ -53,14 +52,16 @@ minetest.register_chatcommand("run_in_book", {
 
 		local text = table.concat(received_messages, "\n")
 		local written_book = ItemStack("default:book_written")
-		written_book:get_meta():from_table({fields = {
-			title = param,
-			owner = name,
-			description = S("\"@1\" by @2", param, name),
-			text = text,
-			page = 1,
-			page_max = math.ceil((#text:gsub("[^\n]", "") + 1) / 14)
-		}})
+		written_book:get_meta():from_table({
+			fields = {
+				title = param,
+				owner = name,
+				description = S('"@1" by @2', param, name),
+				text = text,
+				page = 1,
+				page_max = math.ceil((#text:gsub("[^\n]", "") + 1) / 14),
+			},
+		})
 
 		player:set_wielded_item(written_book)
 
