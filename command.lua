@@ -1,3 +1,7 @@
+local strip_colors = minetest.strip_colors
+
+local strip_translation = futil.strip_translation
+
 local S = default.get_translator
 
 minetest.register_chatcommand("run_in_book", {
@@ -33,22 +37,24 @@ minetest.register_chatcommand("run_in_book", {
 			return false, ("you lack privileges to run %s"):format(command)
 		end
 
-		local old_chat_send_player = minetest.chat_send_player
+		local orig_chat_send_player = minetest.chat_send_player
 		local received_messages = {}
+		-- luacheck: push globals minetest.chat_send_player
 		function minetest.chat_send_player(name2, message)
 			if name == name2 then
-				table.insert(received_messages, minetest.strip_colors(futil.strip_translation(message)))
+				table.insert(received_messages, strip_colors(strip_translation(message)))
 			else
-				old_chat_send_player(name2, message)
+				orig_chat_send_player(name2, message)
 			end
 		end
 
 		local _, status = command_def.func(name, args)
 		if status and status ~= "" then
-			table.insert(received_messages, minetest.strip_colors(futil.strip_translation(status)))
+			table.insert(received_messages, strip_colors(strip_translation(status)))
 		end
 
-		minetest.chat_send_player = old_chat_send_player
+		minetest.chat_send_player = orig_chat_send_player
+		-- luacheck: pop
 
 		local text = table.concat(received_messages, "\n")
 		local written_book = ItemStack("default:book_written")
