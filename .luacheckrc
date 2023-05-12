@@ -648,6 +648,7 @@ stds.minetest = {
 stds.book_runner = {
 	globals = {
 		"book_runner",
+		minetest = {fields = {chat_send_player}},
 	},
 	read_globals = {
 		"default",

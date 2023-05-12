@@ -1,8 +1,12 @@
+local f = string.format
+
 local strip_colors = minetest.strip_colors
 
 local strip_translation = futil.strip_translation
 
 local S = default.get_translator
+
+local max_book_length = book_runner.settings.max_book_length
 
 minetest.register_chatcommand("run_in_book", {
 	params = "<command> [<args>]",
@@ -38,11 +42,21 @@ minetest.register_chatcommand("run_in_book", {
 		end
 
 		local orig_chat_send_player = minetest.chat_send_player
+		local length = 0
+		local skipped_lines = 0
+		local too_long = false
 		local received_messages = {}
-		-- luacheck: push globals minetest.chat_send_player
 		function minetest.chat_send_player(name2, message)
 			if name == name2 then
-				table.insert(received_messages, strip_colors(strip_translation(message)))
+				if too_long then
+					skipped_lines = skipped_lines + 1
+				elseif length + #message + 1 > max_book_length then
+					too_long = true
+					skipped_lines = skipped_lines + 1
+				else
+					table.insert(received_messages, strip_colors(strip_translation(message)))
+					length = length + #message + 1
+				end
 			else
 				orig_chat_send_player(name2, message)
 			end
@@ -54,7 +68,10 @@ minetest.register_chatcommand("run_in_book", {
 		end
 
 		minetest.chat_send_player = orig_chat_send_player
-		-- luacheck: pop
+
+		if too_long then
+			table.insert(received_messages, f("WARNING: too much output, %i lines omitted", skipped_lines))
+		end
 
 		local text = table.concat(received_messages, "\n")
 		local written_book = ItemStack("default:book_written")
