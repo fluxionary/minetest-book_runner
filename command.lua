@@ -14,7 +14,7 @@ minetest.register_chatcommand("run_in_book", {
 	func = function(name, param)
 		local player = minetest.get_player_by_name(name)
 		if not player then
-			return false, "you are not a player"
+			return false, "you must be logged in to run this command"
 		end
 
 		local wielded_item = player:get_wielded_item()
@@ -34,11 +34,11 @@ minetest.register_chatcommand("run_in_book", {
 
 		local command_def = minetest.registered_chatcommands[command]
 		if not command_def then
-			return false, ("unknown command %s"):format(command)
+			return false, f("unknown command %s", command)
 		end
 
 		if not minetest.check_player_privs(player, command_def.privs) then
-			return false, ("you lack privileges to run %s"):format(command)
+			return false, f("you lack privileges to run %s", command)
 		end
 
 		local orig_chat_send_player = minetest.chat_send_player
@@ -62,6 +62,7 @@ minetest.register_chatcommand("run_in_book", {
 			end
 		end
 
+		book_runner.log("action", "%s runs %q", name, param)
 		local _, status = command_def.func(name, args)
 		if status and status ~= "" then
 			table.insert(received_messages, strip_colors(strip_translation(status)))
